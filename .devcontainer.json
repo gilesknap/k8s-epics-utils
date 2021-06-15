@@ -1,0 +1,40 @@
+{
+    // DLS EPICS Developer base image
+    // See https://gitlab.diamond.ac.uk/controls/containers/tools/epics-containers/-/blob/main/images/epics-dev/Dockerfile
+    "image": "dev:latest",
+    // recommended remote extensions, local extensions come from host config
+    "extensions": [
+        "eamodio.gitlens",
+        "gruntfuggly.todo-tree",
+        "mhutchie.git-graph",
+        "ms-kubernetes-tools.vscode-kubernetes-tools",
+        "ms-azuretools.vscode-docker",
+        "ms-toolsai.jupyter",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "redhat.vscode-yaml",
+        "ryanluker.vscode-coverage-gutters",
+        "xyz.local-history",
+    ],
+    // useful default mounts
+    "mounts": [
+        "source=${localEnv:HOME}/.ssh,target=${env:HOME}/.ssh,type=bind,consistency=cached",
+        "source=${localEnv:HOME},target=/hosthome/${localEnv:USER},type=bind,consistency=cached",
+        "source=/tmp,target=/tmp,type=bind,consistency=cached"
+    ],
+
+    "runArgs": [
+        // Allow X11 forwarding so we can run edm etc.
+        "--net",
+        "host",
+        "-e",
+        "DISPLAY=${env:DISPLAY}",
+        "-e",
+        // make DNS work in the container
+        "--dns=127.0.0.53"
+    ],
+    // keep the container running on exit of vscode - this reduces the risk of
+    // accidental pruning and improves restart time
+    "shutdownAction": "none"
+}
