@@ -8,8 +8,12 @@ then
   exit 1
 fi
 
-export IMAGE_REGISTRY=gcr.io/diamond-privreg/controls
-export HELM_REGISTRY=europe-docker.pkg.dev/diamond-privreg
+if [[ -z "$K8S_HELM_REGISTRY" ]] ; then
+    echo please set the environment variables K8S_IMAGE_REGISTRY
+    echo to point to the URL of the HELM registry in which IOC charts are held
+    exit 1
+fi
+
 export HELM_EXPERIMENTAL_OCI=1
 source <(helm completion bash)
 source <(kubectl completion bash)
@@ -21,13 +25,6 @@ complete -F __start_kubectl k
 # some helper functions for ioc management
 ###########################################################################
 
-function helm-login()
-{
-    # authorise helm
-    gcloud auth print-access-token | helm registry login -u oauth2accesstoken \
-      --password-stdin ${HELM_REGISTRY}
-}
-
 function kube-ioc-deploy()
 {
     (
@@ -38,18 +35,14 @@ function kube-ioc-deploy()
     if [ -z "${VERSION}" ]; then VERSION=latest; fi
 
     BL_PREFIX=${IOC_NAME%%-*}
-    IOC_HELM=${HELM_REGISTRY}/${BL_PREFIX}-iocs/${IOC_NAME}
-
-    helm-login
-
-    # TODO - not sure we need to pull this, cant we repo add and then install from repo?
-    # TODO - see what I do in in k3s-minecraft - but repo add seems to fail with DLS artifacts
+    IOC_HELM=${K8S_HELM_REGISTRY}/${IOC_NAME}
 
     # pull the requested ioc helm chart from the registry
     echo getting ${IOC_HELM}:${VERSION}
     helm chart pull ${IOC_HELM}:${VERSION}
     # export it to a folder
     helm chart export ${IOC_HELM}:${VERSION} -d /tmp
+    helm dependencies update /tmp/${IOC_NAME}
 
     # deploy the exported helm chart
     helm upgrade --install ${IOC_NAME}  /tmp/${IOC_NAME}
@@ -108,19 +101,13 @@ function k8s-ioc()
         ;;
 
     g|graylog)
-        ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
-        echo "https://graylog2.diamond.ac.uk/search?rangetype=relative&fields=message%2Csource&width=1489&highlightMessage=&relative=172800&q=namespace_name%3A%22epics-iocs%22+%26%26+pod_name%3A${ioc}*"
+        ioc=${1:? "param 1 should be an ioc e.g. bl45p-mo-ioc-01"}; shift
+        echo "${K8S_GRAYLOG_URL}/search?rangetype=relative&fields=message%2Csource&width=1489&highlightMessage=&relative=172800&q=pod_name%3A${ioc}*"
         ;;
 
     h|history)
         ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
         helm history ${ioc}
-        ;;
-
-    i|iocs)
-        beamline=${1:? "param 1 should be beamline e.g. bl45p"}; shift
-        gcloud artifacts packages list --repository "${beamline}-iocs" \
-            --location europe --project diamond-privreg ${*}
         ;;
 
     list)
@@ -178,15 +165,6 @@ function k8s-ioc()
         kubectl scale deployment --replicas=0 ${ioc} ${*}
         ;;
 
-    v|versions)
-        ioc=${1:? param 1 should be ioc e.g. bl45p-mo-ioc-01 }; shift
-        BL_PREFIX=${ioc%%-*}
-        IOC_HELM=${HELM_REGISTRY}/${BL_PREFIX}-iocs/${IOC_NAME}
-
-        gcloud artifacts tags list --repository "${BL_PREFIX}-iocs" \
-            --project diamond-privreg --location europe --package ${ioc} ${*}
-        ;;
-
     *)
         echo "
         usage:
@@ -205,10 +183,7 @@ function k8s-ioc()
             history <ioc-name>
                     list the history of installed versions of an ioc
             graylog <ioc-name>
-                    print a URL to get to greylog historical logging for ioc
-            iocs beamline
-                    list iocs definitions available for deployment
-                    use versions command to get individual version info
+                    print a URL to get to greylog historical logging for an ioc
             list <ioc-name> [options]
                     list k8s resources associtated with ioc-name
                     -o output formatting e.g. -o name
@@ -231,19 +206,18 @@ function k8s-ioc()
                     start a stopped ioc
             stop  <ioc-name>
                     stop a deployed ioc
-            versions <ioc-name>
-                    list the versions of an ioc in the helm registry
         "
         ;;
     esac
 }
 
+# run most recently built image in the cache - including part build failures
 function run_last()
 {
     docker run -it --user root $(docker images | awk '{print $3}' | awk 'NR==2')
 }
 
+export -f run_last
 export -f kube-ioc-deploy
-export -f k8s-ioc
 export -f beamline-k8s
-export -f helm-login
+export -f k8s-ioc
