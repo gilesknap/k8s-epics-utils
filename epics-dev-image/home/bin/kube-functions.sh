@@ -51,7 +51,7 @@ function kube-ioc-deploy()
 }
 
 # kubectl format strings
-export pods="custom-columns=IOC:metadata.name,VERSION:metadata.labels.ioc_version,STATE:status.containerStatuses[0].state.*.reason,RESTARTS:status.containerStatuses[0].restartCount,STARTED:metadata.managedFields[1].time,IP:status.podIP"
+export pods="custom-columns=IOC:metadata.name,VERSION:metadata.labels.ioc_version,STATE:status.containerStatuses[0].state.*.reason,RESTARTS:status.containerStatuses[0].restartCount,STARTED:metadata.managedFields[0].time,IP:status.podIP"
 export deploys="custom-columns=DEPLOYMENT:metadata.labels.app,VERSION:metadata.labels.ioc_version,REPLICAS:spec.replicas,IMAGE:spec.template.spec.containers[0].image"
 export services="custom-columns=SERVICE:metadata.labels.app,CLUSTER-IP:spec.clusterIP,EXTERNAL-IP:status.loadBalancer.ingress[0].ip,PORT:spec.ports[*].targetPort"
 
@@ -85,7 +85,7 @@ function k8s-ioc()
 
     del|delete)
         ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
-        kubectl delete $(kubectl get all -l app=${ioc} -o name)
+        helm delete ${ioc}
         ;;
 
     deploy)
@@ -113,7 +113,8 @@ function k8s-ioc()
     list)
         ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
         kubectl get all -l app=${ioc} ${*}; echo
-        kubectl get pvc -l app=${ioc} ${*}
+        # if there is no autosave then there may be no pvcs so ignore errors
+        kubectl get pvc -l app=${ioc} ${*} 2> /dev/null
         ;;
 
     l|log)
@@ -122,8 +123,8 @@ function k8s-ioc()
         ;;
 
     m|monitor)
-        ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
-        watch -n0.5 -x -c bash -c "beamline-k8s ${ioc} ${*}"
+        bl=${1:? "param 1 should be a beamline e.g. bl45p"}; shift
+        watch -n0.5 -x -c bash -c "beamline-k8s ${bl} ${*}"
         ;;
 
     ps)
@@ -214,7 +215,7 @@ function k8s-ioc()
 # run most recently built image in the cache - including part build failures
 function run_last()
 {
-    docker run -it --user root $(docker images | awk '{print $3}' | awk 'NR==2')
+    docker run ${@} -it --user root $(docker images | awk '{print $3}' | awk 'NR==2')
 }
 
 export -f run_last
