@@ -1,1 +1,1 @@
-epics-dev-image/home/bin/kube-functions.sh
+images/epics-dev/home/bin/kube-functions.sh

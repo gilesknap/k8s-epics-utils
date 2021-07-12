@@ -1,1 +1,1 @@
-epics-dev-image/home/bin/kube-login.sh
+images/epics-dev/home/bin/kube-login.sh
