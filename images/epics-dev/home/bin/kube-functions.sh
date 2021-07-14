@@ -51,7 +51,8 @@ function kube-ioc-deploy()
 }
 
 # kubectl format strings
-export pods="custom-columns=IOC:metadata.name,VERSION:metadata.labels.ioc_version,STATE:status.containerStatuses[0].state.*.reason,RESTARTS:status.containerStatuses[0].restartCount,STARTED:metadata.managedFields[0].time,IP:status.podIP,IMAGE:spec.containers[0].image"
+export podw="custom-columns=IOC:metadata.name,VERSION:metadata.labels.ioc_version,STATE:status.containerStatuses[0].state.*.reason,RESTARTS:status.containerStatuses[0].restartCount,STARTED:metadata.managedFields[0].time,IP:status.podIP,IMAGE:spec.containers[0].image"
+export pods="custom-columns=IOC:metadata.labels.app,VERSION:metadata.labels.ioc_version,STATE:status.containerStatuses[0].state.*.reason,RESTARTS:status.containerStatuses[0].restartCount,STARTED:metadata.managedFields[0].time"
 export deploys="custom-columns=DEPLOYMENT:metadata.labels.app,VERSION:metadata.labels.ioc_version,REPLICAS:spec.replicas,IMAGE:spec.template.spec.containers[0].image"
 export services="custom-columns=SERVICE:metadata.labels.app,CLUSTER-IP:spec.clusterIP,EXTERNAL-IP:status.loadBalancer.ingress[0].ip,PORT:spec.ports[*].targetPort"
 
@@ -128,11 +129,16 @@ function k8s-ioc()
         ;;
 
     ps)
-        if [ -z ${1} ]
-        then
-            kubectl get pod -l is_ioc==True -o ${pods}
+        if [ "${1}" = "-w" ] ; then
+            shift
+            format=${podw}
         else
-            kubectl get pod -l beamline==${1} -o ${pods}
+            format=${pods}
+        fi
+        if [ -z ${1} ]; then
+            kubectl get pod -l is_ioc==True -o ${format}
+        else
+            kubectl get pod -l beamline==${1} -o ${format}
         fi
         echo
         ;;
