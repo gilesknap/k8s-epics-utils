@@ -11,7 +11,7 @@ fi
 if [[ -z "$K8S_HELM_REGISTRY" ]] ; then
     echo please set the environment variables K8S_IMAGE_REGISTRY
     echo to point to the URL of the HELM registry in which IOC charts are held
-    exit 1
+    echo and run this script again.
 fi
 
 export HELM_EXPERIMENTAL_OCI=1
@@ -68,7 +68,9 @@ function beamline-k8s()
     echo configMaps
     kubectl get configmap -l beamline=${1}; echo
     echo Peristent Volume Claims
-    kubectl get pvc -l beamline=${1}; echo
+    kubectl get pvc -l beamline=${1}; echo 2> /dev/null
+    echo Services
+    kubectl get service -l beamline=${1}; echo 2> /dev/null
 }
 
 function k8s-ioc()
@@ -82,6 +84,11 @@ function k8s-ioc()
         ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
         echo "connecting to ${ioc}. Detach with ^P^Q or stop with ^D"
         kubectl attach -it deployment.apps/${ioc} ${*}
+        ;;
+
+    b|beamline)
+        bl=${1:? "param 1 should be a beamline e.g. bl45p"}; shift
+        beamline-k8s ${bl} ${*}
         ;;
 
     del|delete)

@@ -24,7 +24,7 @@ then
     fi
 fi
 
-kubectl config set-context --current --namespace=epics-iocs
+export K8S_HELM_REGISTRY=oci://ghcr.io/epics-containers
 
 . ${k8sdir}/kube-functions.sh
 
