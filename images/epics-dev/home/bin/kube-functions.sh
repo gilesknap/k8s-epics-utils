@@ -11,7 +11,7 @@ fi
 if [[ -z "$K8S_HELM_REGISTRY" ]] ; then
     echo please set the environment variables K8S_IMAGE_REGISTRY
     echo to point to the URL of the HELM registry in which IOC charts are held
-    exit 1
+    return 1
 fi
 
 export HELM_EXPERIMENTAL_OCI=1
