@@ -24,7 +24,7 @@ then
     fi
 fi
 
-export K8S_HELM_REGISTRY=oci://ghcr.io/epics-containers
+export K8S_HELM_REGISTRY=ghcr.io/epics-containers
 
 . ${k8sdir}/kube-functions.sh
 
