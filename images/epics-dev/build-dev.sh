@@ -19,6 +19,7 @@ fi
 
 set -x
 ${DOCKER} build\
+    --network host\
     --build-arg DEV_UID=$(id -u)\
     --build-arg DEV_GID=$(id -g)\
     --build-arg DEV_UNAME=$(whoami)\

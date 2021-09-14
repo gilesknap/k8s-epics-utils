@@ -1,0 +1,82 @@
+# Deploy epics-dev container to DLS argus cluster GPFS node for
+# kafka performance testing
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  namespace: controls-kafka
+  name: epics-dev
+  labels:
+    app: epics-dev
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: controls-kafka
+  name: epics-dev
+  labels:
+    app: epics-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: epics-dev
+  template:
+    metadata:
+      labels:
+        app: epics-dev
+    spec:
+      terminationGracePeriodSeconds: 5 # nice to have quick restarts on IOCs
+      volumes:
+        - name: epics-dev
+          persistentVolumeClaim:
+            claimName: epics-dev
+        - name: dls
+          hostPath:
+            # The gpfs perf test moint writeable by
+            path: /mnt/gpfs03/performance_testing
+            type: Directory
+      containers:
+        - name: epics-dev
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsUser: 37631
+            runAsGroup: 37798
+          image: ghcr.io/epics-containers/epics-dev:latest
+          command:
+            - bash
+          volumeMounts:
+            - name: epics-dev
+              mountPath: /data
+            - name: dls
+              mountPath: /mnt/gpfs03/performance_testing
+          stdin: true
+          tty: true
+          resources:
+            limits:
+              memory: "2048Mi"
+              cpu: "4"
+            requests:
+              memory: "512Mi"
+              cpu: "1"
+          imagePullPolicy: Always
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - cs05r-sc-cloud-17.diamond.ac.uk
+      tolerations:
+        - key: nodetype
+          operator: Equal
+          value: bl45p
+          effect: NoSchedule
