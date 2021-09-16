@@ -75,15 +75,15 @@ RUN git clone https://github.com/edenhill/librdkafka.git && \
 ########################## switch to developer user ###########################
 USER ${DEV_UNAME}
 
-# # install krew in order to get oidc-login plugin for kubectl
-# RUN cd "$(mktemp -d)" && \
-#     OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
-#     ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
-#     curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" && \
-#     tar zxvf krew.tar.gz && \
-#     KREW=./krew-"${OS}_${ARCH}" && \
-#     "$KREW" install krew && \
-#     ${HOME}/.krew/bin/kubectl-krew install oidc-login
+# install krew in order to get oidc-login plugin for kubectl
+RUN cd "$(mktemp -d)" && \
+    OS="$(uname | tr '[:upper:]' '[:lower:]')" && \
+    ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/\(arm\)\(64\)\?.*/\1\2/' -e 's/aarch64$/arm64/')" && \
+    curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/krew.tar.gz" && \
+    tar zxvf krew.tar.gz && \
+    KREW=./krew-"${OS}_${ARCH}" && \
+    "$KREW" install krew && \
+    ${HOME}/.krew/bin/kubectl-krew install oidc-login
 
 ENV PATH=${PATH}:/home/${DEV_UNAME}/bin:/home/${DEV_UNAME}/.krew/bin
 
