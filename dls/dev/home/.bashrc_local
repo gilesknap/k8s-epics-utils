@@ -9,3 +9,9 @@ function parse_git_branch {
 }
 
 export PS1="\[\e[32m\]\$(parse_git_branch)\[\e[m\][\[\e[34m\]\u@\h\[\e[m\] \W]\$ "
+
+# Make history work across multiple shells and be nice and long
+export HISTIGNORE="&:l[sl]:[fb]g:exit"
+export HISTFILESIZE=10000
+shopt -s histappend
+export PROMPT_COMMAND='history -a'
