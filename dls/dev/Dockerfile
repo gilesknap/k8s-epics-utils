@@ -88,3 +88,24 @@ RUN bash .setup_home.sh
 
 CMD ["/bin/bash"]
 
+# ############## hacky stuff to make DLS RHEL 7 tools work ####################
+
+# get qt4 from archive ppa
+RUN apt install software-properties-common -y && \
+    add-apt-repository ppa:rock-core/qt4 -y && \
+    apt-get update && \
+    apt-get install qt4-dev-tools -y
+
+# TODO: below was an attempt to get dls-python (2.7) to work but so far has failed.
+# Python 2.7 can't see hash functions md5 and shaXXX e.g.:
+# ERROR:
+#   File "/dls_sw/prod/tools/RHEL7-x86_64/urllib3/1-21-1/prefix/lib/python2.7/site-packages/urllib3-1.21.1-py2.7.egg/urllib3/util/ssl_.py", line 7, in <module>
+#     from hashlib import md5, sha1, sha256
+
+RUN   echo "deb http://security.ubuntu.com/ubuntu  xenial-security main" >> /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install libssl1.0.0 -y
+
+# # move the exisiting ssl lib out of the way
+# RUN mv /usr/lib/x86_64-linux-gnu/libssl.so.1.1 /usr/lib/x86_64-linux-gnu/libssl.so.1.1.original
+# # mv /usr/lib/x86_64-linux-gnu/libssl.so.1.0.0 /usr/lib/x86_64-linux-gnu/libssl.so.1.1
