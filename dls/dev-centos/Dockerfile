@@ -19,3 +19,6 @@ ENV XLIBS giflib-devel libXmu-devel libpng-devel libXtst-devel zlib-devel xorg-x
 
 RUN yum install -y epel-release && \
     yum install -y ${XLIBS}
+
+# additional WIP bits
+RUN yum install -y net-tools environment-modules-3.2.10-10.el7.x86_64
