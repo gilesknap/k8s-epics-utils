@@ -22,6 +22,8 @@ RUN yum install -y pyqt4-devel PackageKit-gtk3-module libcanberra-gtk2
 
 # environment
 ENV LANG=en_GB.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LC_CTYPE=en_US.UTF-8
 
 # fun stuff
 RUN yum install -y dia

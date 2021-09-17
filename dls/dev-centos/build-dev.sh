@@ -20,5 +20,5 @@ podman build\
     --build-arg DEV_UNAME=$(whoami)\
     --build-arg FULLNAME="${FULLNAME}"\
     --build-arg EMAIL="${EMAIL}"\
-    -t dev-c7 .
+    -t gcr.io/diamond-pubreg/controls/dev-c7 .
 
