@@ -1,6 +1,7 @@
 #!/bin/bash
+module load gcloud
 
-image=dev-c7
+image=gcr.io/diamond-pubreg/controls/dev-c7:latest
 
 environ="-e DISPLAY -e HOME"
 volumes="-v /dls_sw/prod:/dls_sw/prod \
