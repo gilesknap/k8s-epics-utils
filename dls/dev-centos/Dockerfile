@@ -10,7 +10,7 @@ FROM centos:7
 # dev tools and libraries
 RUN yum update -y && \
     yum groupinstall -y "Development Tools" && \
-    yum install -y redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen
+    yum install -y redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen lapack-devel
 
 # edm dependencies
 RUN yum install -y epel-release && \
@@ -22,3 +22,6 @@ RUN yum install -y pyqt4-devel PackageKit-gtk3-module libcanberra-gtk2
 
 # environment
 ENV LANG=en_GB.UTF-8
+
+# fun stuff
+RUN yum install -y dia

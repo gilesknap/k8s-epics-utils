@@ -1,9 +1,8 @@
 #!/bin/bash
 
-mkdir -p /scratch/${USER}/work
-
 image=dev-c7
-environ="-e DISPLAY -e HOME -e WORKON_HOME=/scratch/${USER}/pipenv"
+
+environ="-e DISPLAY -e HOME"
 volumes="-v /dls_sw/prod:/dls_sw/prod \
         -v /dls_sw/work:/dls_sw/work \
         -v /dls_sw/epics:/dls_sw/epics \
@@ -12,7 +11,7 @@ volumes="-v /dls_sw/prod:/dls_sw/prod \
         -v /scratch:/scratch \
         -v ${HOME}:${HOME}"
 devices="-v /dev/ttyS0:/dev/ttyS0"
-opts="--net=host --rm -ti"
+opts="--net=host --rm -ti --hostname podman"
 x11opts="-v /dev/dri:/dev/dri --security-opt=label=type:container_runtime_t"
 
 # -l loads profile and bashrc
