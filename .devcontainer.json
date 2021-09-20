@@ -7,7 +7,8 @@
         "DISPLAY": "${localEnv:DISPLAY}",
         "HOME": "${localEnv:HOME}",
         "HOSTNAME": "devbox",
-        "USER": "${localEnv:USER}"
+        "USER": "${localEnv:USER}",
+        "WORKON_HOME": "/scratch/${localEnv:USER}",
     },
     // Set *default* container specific settings.json values on container create.
     "settings": {},
