@@ -5,7 +5,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   namespace: controls-kafka
-  name: epics-dev
+  name: data
   labels:
     app: epics-dev
 spec:
@@ -32,32 +32,59 @@ spec:
       labels:
         app: epics-dev
     spec:
-      terminationGracePeriodSeconds: 5 # nice to have quick restarts on IOCs
+      terminationGracePeriodSeconds: 5
       volumes:
-        - name: epics-dev
+        - name: data
           persistentVolumeClaim:
-            claimName: epics-dev
-        - name: dls
+            claimName: data
+        - name: gpfs
           hostPath:
-            # The gpfs perf test moint writeable by
+            # The gpfs perf test mount writeable by
             path: /mnt/gpfs03/performance_testing
-            type: Directory
+        - name: home
+          hostPath:
+            path: /home
+        - name: work
+          hostPath:
+            path: /dls_sw/work
+        - name: prod
+          hostPath:
+            path: /dls_sw/prod
+        - name: etc
+          hostPath:
+            path: /dls_sw/etc
+        - name: apps
+          hostPath:
+            path: /dls_sw/apps
+        - name: epics
+          hostPath:
+            path: /dls_sw/epics
       containers:
         - name: epics-dev
           securityContext:
             allowPrivilegeEscalation: false
             runAsUser: 37631
             runAsGroup: 37798
-          image: ghcr.io/epics-containers/epics-dev:latest
-          command:
-            - bash
+          image: gcr.io/diamond-pubreg/controls/dev-kafka:latest
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do sleep 10; done"]
           volumeMounts:
-            - name: epics-dev
+            - name: data
               mountPath: /data
-            - name: dls
-              mountPath: /mnt/gpfs03/performance_testing
-          stdin: true
-          tty: true
+            - name: gpfs
+              mountPath: /gpfs
+            - name: home
+              mountPath: /home
+            - name: work
+              mountPath: /dls_sw/work
+            - name: prod
+              mountPath: /dls_sw/prod
+            - name: etc
+              mountPath: /dls_sw/etc
+            - name: apps
+              mountPath: /dls_sw/apps
+            - name: epics
+              mountPath: /dls_sw/epics
           resources:
             limits:
               memory: "2048Mi"
@@ -75,8 +102,3 @@ spec:
                     operator: In
                     values:
                       - cs05r-sc-cloud-17.diamond.ac.uk
-      tolerations:
-        - key: nodetype
-          operator: Equal
-          value: bl45p
-          effect: NoSchedule

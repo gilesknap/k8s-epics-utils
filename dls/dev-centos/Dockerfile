@@ -21,9 +21,10 @@ ENV QT_X11_NO_MITSHM=1
 RUN yum install -y pyqt4-devel PackageKit-gtk3-module libcanberra-gtk2
 
 # environment
-ENV LANG=en_GB.UTF-8
+ENV LANG=en_US.UTF-8
 ENV LC_ALL=en_US.UTF-8
 ENV LC_CTYPE=en_US.UTF-8
+ENV MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles:/dls_sw/apps/Modules/modulefiles:/dls_sw/etc/modulefiles:/home/hgv27681/privatemodules:/dls_sw/prod/tools/RHEL8-x86_64/defaults/modulefiles
 
 # fun stuff
 RUN yum install -y dia

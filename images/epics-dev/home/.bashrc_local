@@ -1,5 +1,0 @@
-# custom bash config goes here
-source /google-cloud-sdk/completion.bash.inc
-source /google-cloud-sdk/path.bash.inc
-
-alias k8s="kubectl config use-context argus; source $HOME/bin/kube-login.sh"
