@@ -10,7 +10,7 @@ FROM centos:7
 # dev tools and libraries
 RUN yum update -y && \
     yum groupinstall -y "Development Tools" && \
-    yum install -y redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen cmake lapack-devel readline-devel pcre-devel boost-devel libpcap-devel numactl-libs
+    yum install -y glibc.i686 redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen cmake lapack-devel readline-devel pcre-devel boost-devel libpcap-devel numactl-libs
 
 # edm dependencies
 RUN yum install -y epel-release && \
