@@ -10,11 +10,17 @@ FROM centos:7
 # dev tools and libraries
 RUN yum update -y && \
     yum groupinstall -y "Development Tools" && \
-    yum install -y redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen lapack-devel
+    yum install -y glibc.i686 redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen cmake lapack-devel readline-devel pcre-devel boost-devel libpcap-devel numactl-libs
 
 # edm dependencies
 RUN yum install -y epel-release && \
-    yum install -y giflib-devel libXmu-devel libpng-devel libXtst-devel zlib-devel xorg-x11-proto-devel motif-devel libX11-devel libXp-devel libXpm-devel
+    yum install -y giflib-devel libXmu-devel libpng-devel libXtst-devel zlib-devel xorg-x11-proto-devel motif-devel libX11-devel libXp-devel libXpm-devel libtirpc-devel
+
+# areaDetector dependencies
+RUN yum install -y libxml2-devel libjpeg-turbo-devel libtiff-devel
+
+# Odin dependencies
+RUN yum install -y zeromq-devel librdkafka-devel
 
 # QT4 dependencies
 ENV QT_X11_NO_MITSHM=1

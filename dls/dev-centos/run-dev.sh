@@ -7,6 +7,7 @@ environ="-e DISPLAY -e HOME"
 volumes="-v /dls_sw/prod:/dls_sw/prod \
         -v /dls_sw/work:/dls_sw/work \
         -v /dls_sw/epics:/dls_sw/epics \
+        -v /dls_sw/targetOS/vxWorks/Tornado-2.2:/dls_sw/targetOS/vxWorks/Tornado-2.2 \
         -v /dls_sw/apps:/dls_sw/apps \
         -v /dls_sw/etc:/dls_sw/etc \
         -v /scratch:/scratch \
