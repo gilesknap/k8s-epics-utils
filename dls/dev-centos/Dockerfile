@@ -34,3 +34,7 @@ ENV MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/u
 
 # fun stuff
 RUN yum install -y dia
+
+# allow all users inside the container to sudo
+RUN yum -y install sudo
+COPY /sudoers /etc/sudoers

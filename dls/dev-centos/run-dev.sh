@@ -19,7 +19,8 @@ volumes="-v /dls_sw/prod:/dls_sw/prod \
         -v /scratch:/scratch \
         -v ${HOME}:${HOME}"
 devices="-v /dev/ttyS0:/dev/ttyS0"
-opts="--net=host --rm -ti --hostname podman"
+opts="--userns=keep-id --net=host --rm -ti --hostname dev-c7"
+#opts="--net=host --rm -ti --hostname dev-root"
 x11opts="-v /dev/dri:/dev/dri --security-opt=label=type:container_runtime_t"
 
 # -l loads profile and bashrc
