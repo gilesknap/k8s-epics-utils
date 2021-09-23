@@ -21,9 +21,30 @@ For first time use only:
 
     /dls_sw/apps/setup-podman/setup.sh
 
+start the container
+-------------------
+
 To start the devcontainer:
 
     ./run-dev.sh
+
+work as usual
+-------------
+
+You will now have a prompt inside of the developer container. You will be
+running as root but file access to the host filesystem
+will use your own user id. These host filesystem folders are mounted.
+
+    - Your home directory
+    - /scratch
+    - dls_sw/*  (or at least those dls_sw mounts needed by a controls dev)
+
+You could add further mounts as required by editing a copy of run-dev.sh.
+
+You are free to yum install anything and to modify any of the files inside
+the container but these changes will only last for the lifetime of the
+container (this restriction can be lifted by using container commits but
+you would need to remove the --rm argument in run-dev.sh).
 
 VSCode integration
 ==================
