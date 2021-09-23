@@ -79,3 +79,10 @@ Finally drop the file `.devcontainer.json` into the root folder of a project
 and open that folder with VSCode. You will be prompted to reopen the project
 in a container.
 
+UNFORTUNATELY: run-dev.sh uses --userns=keep-id to give you your native user id
+inside and outside of the container. With VSCode integration this starts the
+container OK but fails when VSCode tries to exec a service in the container.
+Therefore we drop this option in .devcontainer.json and you will run as root
+inside the VSCode terminals. Only noticeable side affect at present is that
+ssh keys don't work and therefore you cannot push to github.
+
