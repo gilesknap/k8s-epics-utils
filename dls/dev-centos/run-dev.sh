@@ -1,4 +1,10 @@
 #!/bin/bash
+
+# A script for launching 'RHEL 7 in a Box' on a DLS workstation
+
+# NOTE that changes to this file should also be propgated to .devcontainer.json
+
+# enable gcloud for authentication to gcr.io
 module load gcloud
 
 image=gcr.io/diamond-pubreg/controls/dev-c7:latest

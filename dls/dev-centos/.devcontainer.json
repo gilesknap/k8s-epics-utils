@@ -29,6 +29,7 @@
         "source=/dls_sw/prod,target=/dls_sw/prod,type=bind,consistency=cached",
         "source=/dls_sw/work,target=/dls_sw/work,type=bind,consistency=cached",
         "source=/dls_sw/epics,target=/dls_sw/epics,type=bind,consistency=cached",
+        "source=/dls_sw/targetOS/vxWorks/Tornado-2.2,target=//dls_sw/targetOS/vxWorks/Tornado-2.2,type=bind,consistency=cached",
         "source=/dls_sw/apps,target=/dls_sw/apps,type=bind,consistency=cached",
         "source=/dls_sw/etc,target=/dls_sw/etc,type=bind,consistency=cached",
         "source=/scratch,target=/scratch,type=bind,consistency=cached",
