@@ -84,5 +84,5 @@ inside and outside of the container. With VSCode integration this starts the
 container OK but fails when VSCode tries to exec a service in the container.
 Therefore we drop this option in .devcontainer.json and you will run as root
 inside the VSCode terminals. Only noticeable side affect at present is that
-ssh keys don't work and therefore you cannot push to github.
+ssh keys don't work (but for some reason I can push to github??).
 
