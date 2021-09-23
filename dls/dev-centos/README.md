@@ -60,10 +60,10 @@ Execute these commands:
     sudo yum install podman-docker
     systemctl --user enable --now podman.socket
 
-Add the following to  /home/<YOUR USER NAME>/.config/Code/User/settings.json
+Add the following to  /home/[YOUR USER NAME]/.config/Code/User/settings.json
 
     "docker.dockerodeOptions": {
-        "socketPath": "/run/user/<YOUR USER ID>/podman/podman.sock"
+        "socketPath": "/run/user/[YOUR USER ID]/podman/podman.sock"
     },
 
 (you can find your uid with the `id` command)
