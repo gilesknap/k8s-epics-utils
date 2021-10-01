@@ -1,0 +1,91 @@
+# deploy vscode container to Kubernetes
+# include a service exposing port 3000 and a auto provisioned
+# persistent volume claim
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: data
+  labels:
+    app: vscode
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 40Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vscode
+  labels:
+    app: vscode
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vscode
+  template:
+    metadata:
+      labels:
+        app: vscode
+    spec:
+      terminationGracePeriodSeconds: 5
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: data
+        - name: work
+          hostPath:
+            path: /dls_sw/work
+        - name: prod
+          hostPath:
+            path: /dls_sw/prod
+        - name: etc
+          hostPath:
+            path: /dls_sw/etc
+        - name: apps
+          hostPath:
+            path: /dls_sw/apps
+        - name: epics
+          hostPath:
+            path: /dls_sw/epics
+      containers:
+        - name: vscode
+          image: gcr.io/diamond-pubreg/controls/devcontainers/vscode:latest
+          volumeMounts:
+            - name: data
+              mountPath: /home/workspace
+            - name: prod
+              mountPath: /dls_sw/prod
+            - name: etc
+              mountPath: /dls_sw/etc
+            - name: apps
+              mountPath: /dls_sw/apps
+            - name: epics
+              mountPath: /dls_sw/epics
+          resources:
+            limits:
+              memory: "4096Mi"
+              cpu: "4"
+            requests:
+              memory: "512Mi"
+              cpu: "1"
+          imagePullPolicy: Always
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: vscode
+  labels:
+    app: vscode
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: vscode
+  type: LoadBalancer
