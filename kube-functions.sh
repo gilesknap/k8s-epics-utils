@@ -102,6 +102,12 @@ function k8s-ioc()
         kube-ioc-deploy ${ioc} ${version} ${*}
         ;;
 
+    deploylocal)
+        ioc=${1:? "param 1 should be name of an ioc helmchart e.g. in iocs folder"}; shift
+        # deploy the local helm chart
+        helm upgrade --install ${ioc} iocs/${ioc}
+        ;;
+
     e|exec)
         ioc=${1:? "param 1 should be ioc e.g. bl45p-mo-ioc-01"}; shift
         echo "connecting to bash shell in ${ioc}. Exit with ^D"

@@ -18,12 +18,12 @@ volumes="-v /dls_sw/prod:/dls_sw/prod \
         -v /dls_sw/etc:/dls_sw/etc \
         -v /scratch:/scratch \
         -v ${HOME}:${HOME}"
-devices="-v /dev/ttyS0:/dev/ttyS0"
-opts="--userns=keep-id --net=host --rm -ti --hostname dev-c7"
-#opts="--net=host --rm -ti --hostname dev-root"
-x11opts="-v /dev/dri:/dev/dri --security-opt=label=type:container_runtime_t"
+devices="-v /dev/ttyS0:/dev/ttyS0 -v /dev/dri:/dev/dri"
+opts="--net=host --rm -ti --hostname dev-c7"
+# this should keep original groups assignment but does not (so we cant write in work)
+identity="--security-opt=label=type:container_runtime_t --annotation run.oci.keep_original_groups=1 --userns=keep-id"
 
 # -l loads profile and bashrc
 command="/bin/bash -l"
 
-podman run ${environ} ${x11opts} ${volumes} ${devices} ${@} ${opts} ${image} ${command}
+podman run ${environ} ${identity} ${volumes} ${devices} ${@} ${opts} ${image} ${command}
