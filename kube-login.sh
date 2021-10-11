@@ -19,9 +19,6 @@ if [ -z "$(which docker 2> /dev/null)" ]
 then
     shopt -s expand_aliases
     alias docker='podman'
-    if which module; then
-        module load argus
-    fi
 fi
 
 export K8S_HELM_REGISTRY=ghcr.io/epics-containers
