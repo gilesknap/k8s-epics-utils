@@ -1,4 +1,0 @@
-record(ai, "test")
-{
-    field(VAL,  "0")
-}

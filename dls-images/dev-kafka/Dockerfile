@@ -1,7 +1,6 @@
 # epics developer Docker image
 # a complete development environment for EPICS iocs and support modules
 
-#ARG BASE_IMAGE=ghcr.io/epics-containers/epics-modules:main
 ARG BASE_IMAGE=gcr.io/diamond-pubreg/controls/dev-c7:latest
 
 FROM ${BASE_IMAGE}
