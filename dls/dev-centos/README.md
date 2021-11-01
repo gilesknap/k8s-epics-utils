@@ -76,7 +76,7 @@ Run up vscode and install the remote development plugin:
 
     module load vscode
     code
-    <control><shift>P
+    <control>P
     ext install ms-vscode-remote.vscode-remote-extensionpack
 
 Finally drop the file `.devcontainer.json` into the root folder of a project
