@@ -36,8 +36,13 @@ work as usual
 -------------
 
 You will now have a prompt inside of the developer container. You will be
-running as root but file access to the host filesystem
-will use your own user id. These host filesystem folders are mounted.
+running as your own user ID if using run-dev.sh. If you are using the vscode
+integration then you will run as root but file access to the host filesystem
+will use your own user id. (this is due to an issue with one of the 
+services that vscode starts in the container - to be investigated 
+further)
+
+These host filesystem folders are mounted.
 
     - Your home directory
     - /scratch
