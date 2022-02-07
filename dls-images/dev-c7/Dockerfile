@@ -5,11 +5,12 @@
 # kubernetes model https://github.com/epics-containers instead of spending
 # effort in rebuilding our toolchain for RHEL8
 
-FROM centos:7
+FROM registry.access.redhat.com/rhel7:7.9-504
+
+RUN yum update -y --skip-broken
 
 # dev tools and libraries
-RUN yum update -y && \
-    yum groupinstall -y "Development Tools" && \
+RUN yum groupinstall -y "Development Tools" && \
     yum install -y glibc.i686 redhat-lsb-core libusbx net-snmp-libs environment-modules git2u net-tools screen cmake lapack-devel readline-devel pcre-devel boost-devel libpcap-devel numactl-libs vim dbus-x11 bind-utils libssh2-devel
 
 # edm dependencies
