@@ -24,7 +24,7 @@ RUN yum install -y zeromq-devel librdkafka-devel
 
 # QT4 dependencies
 ENV QT_X11_NO_MITSHM=1
-RUN yum install -y pyqt4-devel PackageKit-gtk3-module libcanberra-gtk2
+RUN yum install -y pyqt4-devel PackageKit-gtk3-module libcanberra-gtk2 xcb-util xcb-util-devel libxcb.x86_64 libxkbcommon-x11
 
 # environment
 ENV LANG=en_US.UTF-8
@@ -34,6 +34,18 @@ ENV MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/u
 
 # fun stuff
 RUN yum install -y dia
+
+# git 2.23
+RUN sudo yum -y install wget  && \
+    export VER="2.32.0" && \
+    wget https://github.com/git/git/archive/v${VER}.tar.gz && \
+    tar -xvf v${VER}.tar.gz && \
+    rm -f v${VER}.tar.gz && \
+    cd git-* && \
+    make configure && \
+    ./configure --prefix=/usr && \
+    make && \
+    make install
 
 # allow all users inside the container to sudo
 RUN yum -y install sudo
