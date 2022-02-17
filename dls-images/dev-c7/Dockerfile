@@ -36,7 +36,7 @@ ENV MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/u
 RUN yum install -y dia
 
 # git 2.23
-RUN sudo yum -y install wget  && \
+RUN yum -y install wget  && \
     export VER="2.32.0" && \
     wget https://github.com/git/git/archive/v${VER}.tar.gz && \
     tar -xvf v${VER}.tar.gz && \
