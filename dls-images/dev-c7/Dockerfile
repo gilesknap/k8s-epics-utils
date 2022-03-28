@@ -32,9 +32,6 @@ ENV LC_ALL=en_US.UTF-8
 ENV LC_CTYPE=en_US.UTF-8
 ENV MODULEPATH=/etc/scl/modulefiles:/etc/scl/modulefiles:/etc/scl/modulefiles:/usr/share/Modules/modulefiles:/etc/modulefiles:/usr/share/modulefiles:/dls_sw/apps/Modules/modulefiles:/dls_sw/etc/modulefiles:/home/hgv27681/privatemodules:/dls_sw/prod/tools/RHEL8-x86_64/defaults/modulefiles
 
-# fun stuff
-RUN yum install -y dia
-
 # git 2.23
 RUN yum -y install wget  && \
     export VER="2.32.0" && \
@@ -46,6 +43,9 @@ RUN yum -y install wget  && \
     ./configure --prefix=/usr && \
     make && \
     make install
+
+# useful tools 
+RUN yum install -y meld
 
 # allow all users inside the container to sudo
 RUN yum -y install sudo

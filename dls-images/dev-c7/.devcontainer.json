@@ -3,10 +3,13 @@
 {
     "name": "epics-dev",
     "image": "gcr.io/diamond-pubreg/controls/dev-c7:latest",
+// these two lines mount the local workspace folder so that the path is the same inside and outside the container.
+    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind,consistency=cached", 
+    "workspaceFolder": "${localWorkspaceFolder}",
     "remoteEnv": {
         "DISPLAY": "${localEnv:DISPLAY}",
         "HOME": "${localEnv:HOME}",
-        "HOSTNAME": "devbox",
+        "HOSTNAME": "dev-c7",
         "USER": "${localEnv:USER}",
         "WORKON_HOME": "/scratch/${localEnv:USER}",
     },
@@ -14,18 +17,21 @@
     "settings": {},
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-        "ms-vscode.cpptools",
-        "ms-python.python",
-        "ms-python.vscode-pylance",
-        "streetsidesoftware.code-spell-checker",
-        "ryanluker.vscode-coverage-gutters",
-        "mhutchie.git-graph",
-        "eamodio.gitlens",
-        "gruntfuggly.todo-tree",
-        "redhat.vscode-yaml",
-        "nsd.vscode-epics",
-    ],
+		"ms-vscode.cpptools",
+		"ms-python.python",
+		"ms-python.vscode-pylance",
+		"ms-vscode.cmake-tools",
+		"streetsidesoftware.code-spell-checker",
+		"ryanluker.vscode-coverage-gutters",
+		"mhutchie.git-graph",
+		"eamodio.gitlens",
+		"gruntfuggly.todo-tree",
+		"redhat.vscode-yaml",
+		"nsd.vscode-epics",
+		"alefragnani.bookmarks"
+	],
     "mounts": [
+        "source=/dls/detectors,target=/dls/detectors,type=bind,consistency=cached",
         "source=/dls_sw/prod,target=/dls_sw/prod,type=bind,consistency=cached",
         "source=/dls_sw/work,target=/dls_sw/work,type=bind,consistency=cached",
         "source=/dls_sw/epics,target=/dls_sw/epics,type=bind,consistency=cached",
@@ -36,6 +42,10 @@
         "source=${localEnv:HOME},target=${localEnv:HOME},type=bind,consistency=cached",
     ],
     "runArgs": [
+        //  "--userns=keep-id", TODO - we want this setting but one of the services VSCode launches in the container appears to require root
+        "-h=dev-c7",
+        "-v/dev/ttyS0:/dev/ttyS0",
+        "--privileged",
         "--net=host",
         "-ti",
         "-v",

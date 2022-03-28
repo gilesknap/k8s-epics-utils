@@ -92,6 +92,13 @@ UNFORTUNATELY: run-dev.sh uses --userns=keep-id to give you your native user id
 inside and outside of the container. With VSCode integration this starts the
 container OK but fails when VSCode tries to exec a service in the container.
 Therefore we drop this option in .devcontainer.json and you will run as root
-inside the VSCode terminals. Only noticeable side affect at present is that
-ssh keys don't work (but for some reason I can push to github??).
+inside the VSCode terminals. 
+
+Running as root has minimal side affects, any interaction
+with host filesystems will use your own ID (because podman runs in your user
+ID). SSH keys will still work but to SSH to another machine you will need
+to use the following:
+```bash
+ssh your_fed_id@machine_name
+```
 
