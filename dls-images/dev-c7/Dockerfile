@@ -44,9 +44,12 @@ RUN yum -y install wget  && \
     make && \
     make install
 
-# useful tools 
-RUN yum install -y meld
-
 # allow all users inside the container to sudo
 RUN yum -y install sudo
 COPY /sudoers /etc/sudoers
+
+# dls-remote-desktop-support
+RUN yum install -y xfreerdp zenity
+
+# useful tools 
+RUN yum install -y meld
