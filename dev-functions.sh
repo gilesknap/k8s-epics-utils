@@ -31,7 +31,10 @@ all_params="${environ} ${volumes} ${devices} ${opts} ${identity}"
 function cdev-launch
 {  
     if [ -z ${2} ] ; then 
-        echo "usage: cdev-launch <image name> <container name>"; return 1; fi
+        echo 'usage: cdev-launch <image name> <container name> ["podman options"] ["container arguments"]'
+        echo 'note options and args must be quoted'
+        return 1 
+    fi
 
     image="${1}"; name="${2}"; options="${3}"; args="${4}"
 
@@ -76,17 +79,22 @@ function cdev-connect
 
 function cdev-launch-ioc()
 {   
-    if [ -z ${2} or not -d ${1} ] ; then 
+    if [ -z ${2} ] || [ ! -f "${1}/values.yaml" ] ; then 
         echo "usage: cdev-launch-ioc <ioc helm chart folder> <container name>"; return 1; fi
 
     root=${1}; name=${2}; shift 2
 
     # get image root name from the values file
-    image=$(grep base_image iocs/bl45p-mo-ioc-01/values.yaml | awk '{print $2}' | sed 's/:.*//')
+    image=$(grep base_image ${root}/values.yaml | awk '{print $2}' | sed 's/:.*//')
     # get the ioc folder from the values file
-    ioc_folder=$(iocFolder iocs/bl45p-mo-ioc-01/values.yaml | awk '{print $2}')
+    ioc_folder=$(grep iocFolder ${root}/values.yaml | awk '{print $2}')
+    # get the most recent local tag for image
+    tag=$(podman images | /bin/grep ${image} -wm 1 | awk '{print $2}')
+    if [ -z "${tag}" ]; then echo "no local image ${image}"; return 1; fi
 
-    cdev-launch ${image} ${1} 
+    config="-v $(realpath ${root})/config:${ioc_folder}/config"
+
+    cdev-launch ${image}:${tag} ${name} "${config}" "bash ${ioc_folder}/config/start.sh"
 }
 
 function cdev-debug-last-build()
@@ -107,7 +115,7 @@ function cdev-rm()
 
     name=${1}; shift 1
 
-    if [ $(podman ps -qa -f name=${name}) ]; then 
+    if [ "$(podman ps -qa -f name=${name})" ]; then 
         podman container rm ${name}
     fi
     if podman volume exists ${name} ; then 
