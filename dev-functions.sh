@@ -30,7 +30,7 @@ all_params="${environ} ${volumes} ${devices} ${opts} ${identity}"
 
 function cdev-launch
 {  
-    if [ -z ${2} ] ; then 
+    if [ -z "${2}" ] ; then 
         echo 'usage: cdev-launch <image name> <container name> ["podman options"] ["container arguments"]'
         echo 'note options and args must be quoted'
         return 1 
@@ -42,7 +42,7 @@ function cdev-launch
         echo "The container name exists. Please choose a new unique name"
         echo "or connect to an exisiting container with cdev-connect."
         return 1
-    elif [ podman volume exists ${name} ]; then
+    elif podman volume exists ${name} ; then
         echo "WARNING: reconnecting to existing volume ${name}"
     fi
 
@@ -57,7 +57,7 @@ function cdev-launch
 
 function cdev-connect
 {  
-    if [ -z ${1} ] ; then 
+    if [ -z "${1}" ] ; then 
         echo "usage: cdev-connect <container name>"; return 1; fi
 
     name="${1}"; shift 1
@@ -79,10 +79,10 @@ function cdev-connect
 
 function cdev-launch-ioc()
 {   
-    if [ -z ${2} ] || [ ! -f "${1}/values.yaml" ] ; then 
+    if [ -z "${2}" ] || [ ! -f "${1}/values.yaml" ] ; then 
         echo "usage: cdev-launch-ioc <ioc helm chart folder> <container name>"; return 1; fi
 
-    root=${1}; name=${2}; shift 2
+    root="${1}"; name="${2}"; shift 2
 
     # get image root name from the values file
     image=$(grep base_image ${root}/values.yaml | awk '{print $2}' | sed 's/:.*//')
@@ -99,10 +99,10 @@ function cdev-launch-ioc()
 
 function cdev-debug-last-build()
 {   
-    if [ -z ${1} ] ; then 
+    if [ -z "${1}" ] ; then 
         echo "usage: cdev-debug-last-build <container name>"; return 1; fi
 
-    name=${1}; shift 1
+    name="${1}"; shift 1
 
     last_image=$(podman images | awk '{print $3}' | awk 'NR==2')
     cdev-launch ${last_image} ${name} "${@}"
@@ -110,10 +110,10 @@ function cdev-debug-last-build()
 
 function cdev-rm()
 {
-    if [ -z ${1} ] ; then 
+    if [ -z "${1}" ] ; then 
         echo "usage: cdev-rm <container name>"; return 1; fi
 
-    name=${1}; shift 1
+    name="${1}"; shift 1
 
     if [ "$(podman ps -qa -f name=${name})" ]; then 
         podman container rm ${name}
