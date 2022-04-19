@@ -38,7 +38,7 @@ function get-image-name()
     # extract remote git repo to determine ghcr image tag
     image_repo=$(git remote -v 2> /dev/null | sed -e 's/.*github.com:\(.*\)\.git.*/\1/' -e 1q)
     if [ -z "${image_repo}" ] ; then
-        echo "ERROR: This function must be run in a clone of a github container project"
+        echo -e "\nERROR: This function must be run in a clone of a github container project"
         return 1
     fi
     image_tag_base=ghcr.io/${image_repo}
@@ -47,19 +47,29 @@ function get-image-name()
     # use root folder for container name but change / to _ and remove leading /
     repo_root=$(git rev-parse --show-toplevel)
     container_name=$(echo ${repo_root} | sed -e s=/=_=g -e s=^.==)
+
+    if [ "${1}" != "prep" ] && [ -z $(podman images -q ${image_tag}) ] ; then
+        echo -e "\nERROR: the image ${image_tag} does not exist"
+        echo "please run cdev-prep"
+        return 1
+    fi
 }
 
 # user cdev- functions #########################################################
 
 function cdev-prep()
 {
-    if ! get-image-name; then return 1; fi
+    if ! get-image-name "prep"; then return 1; fi
 
     echo "devcontiner name is ${container_name}"
 
     # if the work image tag does not yet exist then pull the latest one and tag
     if [ -z $(podman images -q ${image_tag}) ] ; then
-        podman pull ${image_tag_base}:main
+        if ! podman pull ${image_tag_base}:main; then
+            echo -e "\nERROR: the remote image ${image_tag} does not exist."
+            echo "verify that this project has a released container with tag 'main'"
+            return 1
+        fi
         podman tag ${image_tag_base}:main ${image_tag}
     fi
 
@@ -71,6 +81,8 @@ function cdev-prep()
 function cdev-launch
 {  
     if ! get-image-name; then return 1; fi
+
+    options="${1}"; args="${2}"
     
     if [ "$(podman ps -q -f name=${container_name})" ]; then
         : # container already running so no prep required
@@ -95,25 +107,34 @@ function cdev-launch
     )
 }
 
-
-function cdev-launch-ioc()
+function cdev-ioc-launch()
 {   
     if [ -z "${1}" ] || [ ! -f "${1}/values.yaml" ] ; then 
         echo "usage: cdev-launch-ioc <ioc helm chart folder>"; return 1; fi
 
-    root="${1}"; name="${2}"; shift 2
+    root="${1}"; shift 1
+    container_name=$(basename "${root}")
 
     # get image root name from the values file
     image=$(grep base_image ${root}/values.yaml | awk '{print $2}' | sed 's/:.*//')
     # get the ioc folder from the values file
     ioc_folder=$(grep iocFolder ${root}/values.yaml | awk '{print $2}')
     # get the most recent local tag for image
-    tag=$(podman images | /bin/grep ${image_tag} -wm 1 | awk '{print $2}')
-    if [ -z "${tag}" ]; then echo "no local image ${image_tag}"; return 1; fi
+    tag="${image}:work"
+
+
+    if [ -z $(podman images -q ${tag}) ] ; then
+        echo -e "\nERROR: requires 'work' tag applied to ${tag}"
+        return 1; 
+    fi
 
     config="-v $(realpath ${root})/config:${ioc_folder}/config"
-
-    cdev-launch ${image_tag}:${tag} ${container_name} "${config}" "bash ${ioc_folder}/config/start.sh"
+    ( 
+        set -x; 
+        # execute the IOC and drop back to bash on exit
+        podman run --rm -it ${config} ${all_params} --name ${container_name} \
+          ${tag} bash -c "bash ${ioc_folder}/config/start.sh; bash"
+    )
 }
 
 function cdev-debug-last-build()
