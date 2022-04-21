@@ -32,8 +32,8 @@ function get-image-name()
     # a container build project hosted on github.
     #
     # This function determines the github container registry name from
-    # the remote name and also generates a unique container name to use
-    # from the local root folder of the clone
+    # the remote name and also generates a container name to use
+    # from the local root folder name of the clone
     
     # extract remote git repo to determine ghcr image tag
     image_repo=$(git remote -v 2> /dev/null | sed -e 's/.*github.com:\(.*\)\.git.*/\1/' -e 1q)
@@ -44,9 +44,9 @@ function get-image-name()
     image_tag_base=ghcr.io/${image_repo}
     image_tag=${image_tag_base}:work
 
-    # use root folder for container name but change / to _ and remove leading /
+    # use root folder basename for container name
     repo_root=$(git rev-parse --show-toplevel)
-    container_name=$(echo ${repo_root} | sed -e s=/=_=g -e s=^.==)
+    container_name=$(basename ${repo_root})
 
     if [ "${1}" != "prep" ] && [ -z $(podman images -q ${image_tag}) ] ; then
         echo -e "\nERROR: the image ${image_tag} does not exist"
@@ -139,13 +139,12 @@ function cdev-ioc-launch()
 
 function cdev-debug-last-build()
 {   
-    if [ -z "${1}" ] ; then 
-        echo "usage: cdev-debug-last-build <container name>"; return 1; fi
-
-    name="${1}"; shift 1
-
-    last_image=$(podman images | awk '{print $3}' | awk 'NR==2')
-    cdev-launch ${last_image} ${container_name} "${@}"
+    # get the most recently built image name from cache 
+    last_image=$(podman images | awk '{print $3}' | awk 'NR==2')    
+    ( 
+        set -x; 
+        podman run -it --name debug_build --rm ${all_params} ${last_image}
+    ) 
 }
 
 function cdev-stop()
@@ -158,7 +157,6 @@ function cdev-stop()
 
 function cdev-rm()
 {
-
     if ! get-image-name; then return 1; fi
 
     # free up resources but keep the container so you can come back to it
