@@ -48,7 +48,7 @@ function get-image-name()
     repo_root=$(git rev-parse --show-toplevel)
     container_name=$(basename ${repo_root})
 
-    if [ "${1}" != "prep" ] && [ -z $(podman images -q ${image_tag}) ] ; then
+    if [ "${1}" != "nocheck" ] && [ -z $(podman images -q ${image_tag}) ] ; then
         echo -e "\nERROR: the image ${image_tag} does not exist"
         echo "please run cdev-prep"
         return 1
@@ -59,11 +59,11 @@ function get-image-name()
 
 function cdev-prep()
 {
-    if ! get-image-name "prep"; then return 1; fi
+    if ! get-image-name "nocheck"; then return 1; fi
 
     echo "devcontiner name is ${container_name}"
 
-    # if the work image tag does not yet exist then pull the latest one and tag
+    # if the work image tag does not yet exist then pull the latest image and tag
     if [ -z $(podman images -q ${image_tag}) ] ; then
         if ! podman pull ${image_tag_base}:main; then
             echo -e "\nERROR: the remote image ${image_tag} does not exist."
@@ -73,9 +73,12 @@ function cdev-prep()
         podman tag ${image_tag_base}:main ${image_tag}
     fi
 
-    # extract the repos folder so that changes are persisted in the host filesystem
-    echo "copying container /repos to ${repo_root}/repos ..."
-    podman run --rm --privileged -v ${repo_root}/repos:/copy ${image_tag} rsync -a /repos/ /copy
+    if [ "${1}" != "nocopy" ]; then
+        # extract the repos folder so that changes are persisted in the host filesystem
+        echo "copying container /repos to ${repo_root}/repos ..."
+        mkdir -p ${repo_root}/repos
+        podman run --rm --privileged -v ${repo_root}/repos:/copy ${image_tag} rsync -a /repos/ /copy
+    fi
 }
 
 function cdev-launch
@@ -149,7 +152,7 @@ function cdev-debug-last-build()
 
 function cdev-stop()
 {
-    if ! get-image-name; then return 1; fi
+    if ! get-image-name "nocheck"; then return 1; fi
 
     # free up resources but keep the container so you can come back to it
     podman stop ${container_name}
@@ -157,9 +160,25 @@ function cdev-stop()
 
 function cdev-rm()
 {
-    if ! get-image-name; then return 1; fi
+    if ! get-image-name "nocheck"; then return 1; fi
 
-    # free up resources but keep the container so you can come back to it
+    # delete the container (but keep the repo changes in host filesystem)
     podman container rm -f ${container_name}
 }
 
+function cdev-tag()
+{
+    if [ -z "${1}" ] ; then 
+        echo "usage: cdev-tag <image version tag>"; return 1; fi
+
+    if ! get-image-name; then return 1; fi   
+    
+    podman tag ${image_tag} ${image_tag_base}:${1}
+}
+
+function cdev-build()
+{
+    if ! get-image-name "nocheck"; then return 1; fi   
+    
+    podman build -t ${image_tag} --target developer ${repo_root}
+}
