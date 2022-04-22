@@ -14,7 +14,6 @@ if [[ -z "$K8S_HELM_REGISTRY" ]] ; then
     return 1
 fi
 
-export HELM_EXPERIMENTAL_OCI=1
 source <(helm completion bash)
 source <(kubectl completion bash)
 
@@ -28,25 +27,22 @@ complete -F __start_kubectl k
 function kube-ioc-deploy()
 {
     (
-    set -e
+        set -e
 
-    IOC_NAME=${1}
-    VERSION=${2}
-    if [ -z "${VERSION}" ]; then VERSION=latest; fi
+        IOC_NAME=${1}
+        VERSION=${2}
+        if [ -z "${VERSION}" ]; then VERSION=latest; fi
 
-    BL_PREFIX=${IOC_NAME%%-*}
-    IOC_HELM=${K8S_HELM_REGISTRY}/${IOC_NAME}
+        BL_PREFIX=${IOC_NAME%%-*}
+        IOC_HELM=oci://${K8S_HELM_REGISTRY}/${IOC_NAME}
 
-    # pull the requested ioc helm chart from the registry
-    echo getting ${IOC_HELM}:${VERSION}
-    helm chart pull ${IOC_HELM}:${VERSION}
-    # export it to a folder
-    helm chart export ${IOC_HELM}:${VERSION} -d /tmp
-    helm dependencies update /tmp/${IOC_NAME}
+        echo getting ${IOC_HELM}:${VERSION}
 
-    # deploy the exported helm chart
-    helm upgrade --install ${IOC_NAME}  /tmp/${IOC_NAME}
-    rm -r /tmp/${IOC_NAME}
+        # deploy the exported helm chart
+        (
+            set -x
+            helm upgrade --install ${IOC_NAME} ${IOC_HELM} --version ${VERSION}
+        )
     )
 }
 
@@ -56,21 +52,16 @@ export pods="custom-columns=IOC:metadata.labels.app,VERSION:metadata.labels.ioc_
 export deploys="custom-columns=DEPLOYMENT:metadata.labels.app,VERSION:metadata.labels.ioc_version,REPLICAS:spec.replicas,IMAGE:spec.template.spec.containers[0].image"
 export services="custom-columns=SERVICE:metadata.labels.app,CLUSTER-IP:spec.clusterIP,EXTERNAL-IP:status.loadBalancer.ingress[0].ip,PORT:spec.ports[*].targetPort"
 
-function beamline-k8s()
+function beamline-info()
 {
-    if [ -z ${1} ]
-    then
-      echo please specify a beamline
-      return
-    fi
-    kubectl get deployment -l beamline=${1} -o $deploys; echo
+    kubectl get deployment -l beamline=${beamline} -o $deploys; echo
     kubectl get pod -l beamline=${1} -o $pods; echo
     echo configMaps
-    kubectl get configmap -l beamline=${1}; echo
+    kubectl get configmap -l beamline=${beamline}; echo
     echo Peristent Volume Claims
-    kubectl get pvc -l beamline=${1}; echo 2> /dev/null
+    kubectl get pvc -l beamline=${beamline}; echo 2> /dev/null
     echo Services
-    kubectl get service -l beamline=${1}; echo 2> /dev/null
+    kubectl get service -l beamline=${beamline}; echo 2> /dev/null
 }
 
 function k8s-ioc()
@@ -88,7 +79,16 @@ function k8s-ioc()
 
     b|beamline)
         bl=${1:? "param 1 should be a beamline e.g. bl45p"}; shift
-        beamline-k8s ${bl} ${*}
+        if [ -z "$(kubectl get namespaces | grep ${bl})" ] ; then
+            echo "ERROR: namespace ${bl} does not exist"
+            return 1
+        fi
+        beamline=${bl}
+        kubectl config set-context --current --namespace=${bl}
+        ;;
+
+    i|info)
+        beamline-info
         ;;
 
     del|delete)
@@ -138,7 +138,7 @@ function k8s-ioc()
 
     m|monitor)
         bl=${1:? "param 1 should be a beamline e.g. bl45p"}; shift
-        watch -n0.5 -x -c bash -c "beamline-k8s ${bl} ${*}"
+        watch -n0.5 -x -c bash -c "beamline-info ${bl} ${*}"
         ;;
 
     ps)
@@ -154,13 +154,6 @@ function k8s-ioc()
             kubectl get pod -l beamline==${1} -o ${format}
         fi
         echo
-        ;;
-
-    purge)
-        # delete the helm local cache (helm prune is not yet implemented
-        # and even remove is hard to use if the resource names are too long
-        # to show in 'helm chart list')
-        rm -fr ~/.cache/helm/registry/cache/
         ;;
 
     r|restart)
@@ -215,8 +208,6 @@ function k8s-ioc()
                     monitor the status of running IOCs on a beamline
             ps [<beamline>]
                     list all running iocs [on beamline]
-            purge
-                    clear the helm local cache
             restart <ioc-name>
                     restart a running ioc
             rollback <ioc-name> <revision>
@@ -239,5 +230,8 @@ function run_last()
 
 export -f run_last
 export -f kube-ioc-deploy
-export -f beamline-k8s
+export -f beamline-info
 export -f k8s-ioc
+
+# default beamline is p45
+k8s-ioc beamline bl45p

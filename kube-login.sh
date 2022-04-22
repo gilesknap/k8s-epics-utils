@@ -3,7 +3,7 @@
 # source this script to enable access to argus kubernetes cluster
 # and setup the functions to deploy and mananage iocs in that cluster
 
-# WARNING this script is specific to the DLS argus cluster
+# WARNING this script is specific to the DLS pollux cluster
 # WARNING please use as an example as to how to configure a cluster
 # TODO deprecate this script and write HowTo Documentation instead
 
@@ -22,6 +22,9 @@ then
 fi
 
 export K8S_HELM_REGISTRY=ghcr.io/epics-containers
+echo 'loading config for pollux cluster and helm 3.8.2 ...'
+module load pollux > /dev/null
+module load helm helm/3.8.2 > /dev/null
 
 . ${k8sdir}/kube-functions.sh
 
