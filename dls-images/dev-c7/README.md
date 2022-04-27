@@ -64,6 +64,14 @@ it work with podman requires a little persuasion.
 I believe this will only work on RHEL8. The earlier version of podman on RHEL7
 does not have the correct API.
 
+The following setting in vscode user settings will ensure that each terminal
+loads the bash profile. This includes essential setup for DLS developer 
+environment.
+
+```
+"terminal.integrated.defaultProfile.linux": "bash (login)"
+```
+
 Execute these commands:
 
     sudo yum install podman-docker
@@ -101,4 +109,14 @@ to use the following:
 ```bash
 ssh your_fed_id@machine_name
 ```
+
+Know Issues
+===========
+When a devcontainer is launched it will usually start a single terminal that is
+NOT using the login profile. To work around this close and reopen the 1st terminal
+or type:
+```
+bash -l
+```
+
 
