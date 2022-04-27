@@ -17,7 +17,7 @@ any linux workstation that has /dls_sw and /scratch mounted)
 
 If you want to use edm then you will need to install the local fonts on your
 host machine. use ``sudo yum install`` on each of the rpms in this folder
-https://github.com/epics-containers/k8s-epics-utils/tree/main/dls/edm-fonts
+https://github.com/epics-containers/k8s-epics-utils/tree/main/dls-images/edm-fonts
 
 configure podman
 ----------------
