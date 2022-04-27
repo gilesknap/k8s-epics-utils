@@ -11,7 +11,6 @@
         "HOME": "${localEnv:HOME}",
         "HOSTNAME": "dev-c7",
         "USER": "${localEnv:USER}",
-        "WORKON_HOME": "/scratch/${localEnv:USER}",
     },
     // Set *default* container specific settings.json values on container create.
     "settings": {},
@@ -38,18 +37,13 @@
         "source=/dls_sw/targetOS/vxWorks/Tornado-2.2,target=//dls_sw/targetOS/vxWorks/Tornado-2.2,type=bind,consistency=cached",
         "source=/dls_sw/apps,target=/dls_sw/apps,type=bind,consistency=cached",
         "source=/dls_sw/etc,target=/dls_sw/etc,type=bind,consistency=cached",
-        "source=/scratch,target=/scratch,type=bind,consistency=cached",
         "source=${localEnv:HOME},target=${localEnv:HOME},type=bind,consistency=cached",
+        "source=/scratch/${localEnv:USER},target=/scratch/${localEnv:USER},type=bind,consistency=cached",
     ],
     "runArgs": [
-        //  "--userns=keep-id", TODO - we want this setting but one of the services VSCode launches in the container appears to require root
         "-h=dev-c7",
         "-v/dev/ttyS0:/dev/ttyS0",
         "--privileged",
-        "--net=host",
-        "-ti",
-        "-v",
-        "/dev/dri:/dev/dri",
-        "--security-opt=label=type:container_runtime_t",
+        "--net=host"
     ],
 }
